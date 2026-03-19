@@ -8,7 +8,7 @@ export function Earth() {
 
   useEffect(() => {
     new THREE.TextureLoader().load(
-      "https://res.cloudinary.com/eclipse5137/image/upload/v1773567907/18921804_0zaq_ag24_210203_usg9ts.jpg",
+      "/earth.jpg",
       (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
         setTexture(tex);
