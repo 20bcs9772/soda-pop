@@ -1,4 +1,5 @@
 import React from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { HeroSection } from './components/HeroSection';
 import { DirtySodaSection } from './components/DirtySodaSection';
 import { GlobeSection } from './components/GlobeSection';
@@ -17,6 +18,7 @@ export default function App() {
       <GlobeSection />
       <TestimonialSection />
       <CTASection />
+      <Analytics />
     </main>
   );
 }
