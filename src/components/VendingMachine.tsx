@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingCart, X, Trash2 } from 'lucide-react';
+import { ShoppingCart, X } from 'lucide-react';
 
 const drinks = [
   { id: 'A1', name: 'Dirty Coke', color: '#5d4037', img: '/menu/coke.png', flavor: 'Classic Coke with coconut cream & lime', price: '$4.50', popular: true },
@@ -13,7 +13,7 @@ const drinks = [
 ];
 
 type Drink = (typeof drinks)[number];
-type CartItem = Drink & { cartId: string };
+type CartLine = Drink & { quantity: number };
 
 function parsePrice(priceStr: string): number {
   const match = priceStr.replace(/[^0-9.]/g, '');
@@ -24,7 +24,7 @@ export default function VendingMachine() {
   const [selectedDrink, setSelectedDrink] = useState<Drink | null>(drinks[0]);
   const [dispensing, setDispensing] = useState<string | null>(null);
   const [dispensedDrink, setDispensedDrink] = useState<Drink | null>(null);
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartLine[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
 
   const handleSelect = (drink: Drink) => {
@@ -34,27 +34,47 @@ export default function VendingMachine() {
 
   const handleAddToCart = () => {
     if (!selectedDrink || dispensing) return;
-    setDispensing(selectedDrink.id);
+    const drinkToAdd = selectedDrink;
+
+    setDispensing(drinkToAdd.id);
     setDispensedDrink(null);
     setTimeout(() => {
       setDispensing(null);
-      setDispensedDrink(selectedDrink);
+      setDispensedDrink(drinkToAdd);
     }, 1500);
     setTimeout(() => {
-      setCart((c) => [...c, { ...selectedDrink, cartId: `${selectedDrink.id}-${Date.now()}` }]);
+      setCart((c) => {
+        const existing = c.find((line) => line.id === drinkToAdd.id);
+        if (existing) {
+          return c.map((line) =>
+            line.id === drinkToAdd.id ? { ...line, quantity: line.quantity + 1 } : line
+          );
+        }
+
+        return [...c, { ...drinkToAdd, quantity: 1 }];
+      });
       setDispensedDrink(null);
     }, 2300);
   };
 
-  const removeFromCart = (cartId: string) => {
-    setCart((c) => c.filter((item) => item.cartId !== cartId));
+  const incrementCartItem = (drinkId: string) => {
+    setCart((c) => c.map((line) => (line.id === drinkId ? { ...line, quantity: line.quantity + 1 } : line)));
   };
 
-  const cartTotal = cart.reduce((sum, item) => sum + parsePrice(item.price), 0);
+  const decrementCartItem = (drinkId: string) => {
+    setCart((c) =>
+      c
+        .map((line) => (line.id === drinkId ? { ...line, quantity: Math.max(0, line.quantity - 1) } : line))
+        .filter((line) => line.quantity > 0)
+    );
+  };
+
+  const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartTotal = cart.reduce((sum, item) => sum + parsePrice(item.price) * item.quantity, 0);
   const totalFormatted = `$${cartTotal.toFixed(2)}`;
 
   const handleCartButtonClick = () => {
-    if (cart.length === 0) {
+    if (cartItemCount === 0) {
       document.getElementById('vending-machine')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
       setCartOpen(true);
@@ -205,12 +225,12 @@ export default function VendingMachine() {
       <button
         onClick={handleCartButtonClick}
         className="fixed bottom-8 right-8 z-50 w-[64px] h-[64px] rounded-[16px] bg-[var(--color-vending-red)] border-4 border-[var(--color-primary)] shadow-[6px_6px_0px_0px_rgba(34,34,34,1)] flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-transform"
-        aria-label={cart.length > 0 ? 'Open cart' : 'Scroll to vending machine'}
+        aria-label={cartItemCount > 0 ? 'Open cart' : 'Scroll to vending machine'}
       >
         <ShoppingCart className="w-8 h-8" strokeWidth={2.5} />
-        {cart.length > 0 && (
+        {cartItemCount > 0 && (
           <span className="absolute -top-1 -right-1 min-w-[24px] h-6 px-1.5 rounded-full bg-[var(--color-accent-lime)] text-[var(--color-primary)] font-display font-bold text-[14px] flex items-center justify-center border-2 border-[var(--color-primary)] shadow-[2px_2px_0px_0px_rgba(34,34,34,1)]">
-            {cart.length}
+            {cartItemCount}
           </span>
         )}
       </button>
@@ -255,7 +275,7 @@ export default function VendingMachine() {
             ) : (
               cart.map((item) => (
                 <div
-                  key={item.cartId}
+                  key={item.id}
                   className="flex items-center gap-4 p-4 bg-white border-4 border-[var(--color-primary)] rounded-[12px] shadow-[4px_4px_0px_0px_rgba(34,34,34,1)]"
                 >
                   <div
@@ -272,13 +292,25 @@ export default function VendingMachine() {
                       {item.price}
                     </p>
                   </div>
-                  <button
-                    onClick={() => removeFromCart(item.cartId)}
-                    className="shrink-0 w-10 h-10 rounded-[8px] border-2 border-[var(--color-primary)] flex items-center justify-center text-[var(--color-primary)] hover:bg-[var(--color-bg-light)] transition-colors"
-                    aria-label={`Remove ${item.name} from cart`}
-                  >
-                    <Trash2 className="w-5 h-5" strokeWidth={2.5} />
-                  </button>
+                  <div className="shrink-0 flex items-center gap-3">
+                    <button
+                      onClick={() => decrementCartItem(item.id)}
+                      className="w-10 h-10 rounded-[8px] border-2 border-[var(--color-primary)] flex items-center justify-center text-[var(--color-primary)] hover:bg-[var(--color-bg-light)] transition-colors"
+                      aria-label={`Decrease quantity of ${item.name}`}
+                    >
+                      <span className="font-display font-bold text-[24px] leading-none">-</span>
+                    </button>
+                    <span className="min-w-[28px] text-center font-display text-[22px] text-[var(--color-primary)] font-bold">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() => incrementCartItem(item.id)}
+                      className="w-10 h-10 rounded-[8px] border-2 border-[var(--color-primary)] flex items-center justify-center text-[var(--color-primary)] hover:bg-[var(--color-bg-light)] transition-colors"
+                      aria-label={`Increase quantity of ${item.name}`}
+                    >
+                      <span className="font-display font-bold text-[24px] leading-none">+</span>
+                    </button>
+                  </div>
                 </div>
               ))
             )}

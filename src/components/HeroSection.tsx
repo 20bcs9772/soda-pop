@@ -100,7 +100,7 @@ export function HeroSection() {
         <div className="relative z-10 w-full min-[901px]:w-1/2 order-2 min-[901px]:order-1 flex flex-col items-start min-w-0 max-[900px]:items-center max-[900px]:text-center mt-8 min-[901px]:mt-0">
           <div
             ref={numeralRef}
-            className="absolute -top-12 -left-8 min-[901px]:-left-12 max-[900px]:left-1/2 max-[900px]:-translate-x-1/2 bg-[var(--color-accent-lime)] border-4 border-[var(--color-primary)] shadow-[4px_4px_0px_0px_rgba(34,34,34,1)] px-4 py-2 z-0 -rotate-6"
+            className="absolute -top-12 -left-8 min-[901px]:-left-12 max-[900px]:left-1/2 max-[900px]:-translate-x-1/2 bg-[var(--color-accent-lime)] border-4 border-[var(--color-primary)] shadow-[4px_4px_0px_0px_rgba(34,34,34,1)] px-4 py-2 max-[900px]:z-10 min-[901px]:z-0 -rotate-6"
           >
             <span className="font-display text-[48px] max-[900px]:text-[36px] text-[var(--color-primary)] leading-none">
               #1
@@ -142,7 +142,7 @@ export function HeroSection() {
 
         {/* Right Column - desktop: drink + cups; mobile: drink image first in stack (order-1), no overlay */}
         <div className="relative w-full min-[901px]:w-1/2 flex justify-center min-[901px]:justify-end pointer-events-none order-1 min-[901px]:order-2 max-[900px]:flex max-[900px]:items-center max-[900px]:justify-center max-[900px]:min-h-0">
-          <div className="relative z-10">
+          <div className="relative max-[900px]:z-0 min-[901px]:z-10">
             {/* Comic burst behind drink */}
             <div
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 aspect-square w-[260px] min-[901px]:w-[340px] bg-[var(--color-accent-yellow)] border-4 border-[var(--color-primary)] z-0"
@@ -155,7 +155,7 @@ export function HeroSection() {
               ref={drinkRef}
               src="/drink-hero.png"
               alt="Johnny's Dirty Soda"
-              className="relative z-10 h-[560px] max-[900px]:h-[320px] max-[600px]:h-[260px] max-[400px]:h-[220px] max-[900px]:flex-shrink-0 w-auto object-contain -rotate-[10deg] min-[901px]:pointer-events-auto drop-shadow-2xl min-[901px]:-mt-[10px] min-[901px]:translate-x-[40px]"
+              className="relative z-0 min-[901px]:z-10 h-[560px] max-[900px]:h-[320px] max-[600px]:h-[260px] max-[400px]:h-[220px] max-[900px]:flex-shrink-0 w-auto object-contain -rotate-[10deg] min-[901px]:pointer-events-auto drop-shadow-2xl min-[901px]:-mt-[10px] min-[901px]:translate-x-[40px]"
               loading="lazy"
               onError={(e) => { e.currentTarget.src = '/grapefruit.png'; }}
             />
